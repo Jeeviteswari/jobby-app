@@ -1,19 +1,31 @@
 import {Component} from 'react'
+import Cookies from 'js-cookie'
+import {Redirect} from 'react-router-dom'
+
 import './index.css'
 
 class LoginForm extends Component {
-  state = {username: '', password: '', showSubmitError: false, errorMessage: ''}
-
-  onSubmitFailure = errorMessage => {
-    this.setState({showSubmitError: true, errorMessage})
+  state = {
+    username: '',
+    password: '',
+    showSubmitError: false,
+    errorMsg: '',
   }
 
-  onSubmitSuccess = () => {
+  onSubmitSuccess = jwtToken => {
     const {history} = this.props
+    Cookies.set('jwt_token', jwtToken, {
+      expires: 30,
+      path: '/',
+    })
     history.replace('/')
   }
 
-  onSubmitEvent = async event => {
+  onSubmitFailure = errorMsg => {
+    this.setState({showSubmitError: true, errorMsg})
+  }
+
+  onSubmitForm = async event => {
     event.preventDefault()
     const {username, password} = this.state
     const userDetails = {username, password}
@@ -24,33 +36,54 @@ class LoginForm extends Component {
     }
     const response = await fetch(url, options)
     const data = await response.json()
-    console.log(data)
     if (response.ok === true) {
-      this.onSubmitSuccess()
+      this.onSubmitSuccess(data.jwt_token)
     } else {
       this.onSubmitFailure(data.error_msg)
     }
   }
 
-  onChangePassword = event => {
+  onEnterUsername = event => {
     this.setState({username: event.target.value})
   }
 
-  onChangeUserName = event => {
+  onChangePassword = event => {
     this.setState({password: event.target.value})
   }
 
-  renderPasswordField = () => {
-    const {password} = this.state
+  renderUsername = () => {
+    const {username} = this.state
+
     return (
       <>
-        <label className="password" htmlFor="labelId">
-          Password
+        <label className="label" htmlFor="userName">
+          USERNAME
         </label>
         <input
           type="text"
-          id="labelId"
-          placeholder="password"
+          id="userName"
+          placeholder="Username"
+          className="user-input"
+          value={username}
+          onChange={this.onEnterUsername}
+        />
+      </>
+    )
+  }
+
+  renderPassword = () => {
+    const {password} = this.state
+
+    return (
+      <>
+        <label className="label" htmlFor="password">
+          Password
+        </label>
+        <input
+          className="user-input"
+          id="password"
+          type="password"
+          placeholder="Password"
           value={password}
           onChange={this.onChangePassword}
         />
@@ -58,41 +91,30 @@ class LoginForm extends Component {
     )
   }
 
-  renderUsernameField = () => {
-    const {username} = this.state
-    return (
-      <>
-        <label className="username" htmlFor="labelId">
-          Username
-        </label>
-        <input
-          type="text"
-          id="labelId"
-          placeholder="username"
-          value={username}
-          onChange={this.onChangeUserName}
-        />
-      </>
-    )
-  }
-
   render() {
-    const {showSubmitError, errorMessage} = this.state
+    const {showSubmitError, errorMsg} = this.state
+    const jwtToken = Cookies.get('jwt_token')
+    if (jwtToken !== undefined) {
+      return <Redirect to="/" />
+    }
+
     return (
-      <div className="bg-container">
-        <form className="form-container" onSubmit={this.onSubmitEvent}>
+      <div className="jobby-app-container">
+        <div className="card-container">
           <img
             src="https://assets.ccbp.in/frontend/react-js/logo-img.png"
-            className="website-logo"
             alt="website logo"
+            className="website-logo"
           />
-          <div className="input-container">{this.renderUsernameField()}</div>
-          <div className="input-container">{this.renderPasswordField()}</div>
-          <button type="button" className="login-button">
-            Login
-          </button>
-          {showSubmitError && <p>*{errorMessage}</p>}
-        </form>
+          <form className="form-container" onSubmit={this.onSubmitForm}>
+            <div className="input-container">{this.renderUsername()}</div>
+            <div className="input-container">{this.renderPassword()}</div>
+            <button className="login-button" type="submit">
+              Login
+            </button>
+            {showSubmitError && <p className="error-msg">*{errorMsg}</p>}
+          </form>
+        </div>
       </div>
     )
   }
