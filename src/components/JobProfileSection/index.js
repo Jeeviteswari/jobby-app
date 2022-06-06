@@ -146,6 +146,7 @@ class JobProfileSection extends Component {
             onClick={this.getJobDetails}
           >
             <BsSearch className="search-icon" />
+            Retry
           </button>
         </div>
         <ul className="job-details-item-container">
@@ -172,6 +173,7 @@ class JobProfileSection extends Component {
             onClick={this.getJobDetails}
           >
             <BsSearch className="search-icon" />
+            Retry
           </button>
         </div>
         <img
