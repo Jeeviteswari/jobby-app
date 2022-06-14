@@ -1,4 +1,5 @@
 import ProfileDetails from '../ProfileDetails'
+
 import './index.css'
 
 const JobsFilterGroup = props => {
